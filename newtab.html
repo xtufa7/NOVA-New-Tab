@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0b0b10" />
+    <title>NØVA</title>
+    <link rel="stylesheet" href="/src/newtab/style.css" />
+  </head>
+  <body class="nova-loading">
+    <div id="background" aria-hidden="true"></div>
+    <header class="masthead">
+      <span class="wordmark">NØVA</span>
+      <div class="top-actions">
+        <button id="edit-toggle" aria-label="Edit layout" title="Edit layout · Ctrl Shift E">
+          ⌘</button
+        ><button
+          id="settings-toggle"
+          aria-label="Open control center"
+          title="Control center · Ctrl ,"
+        >
+          ⚙
+        </button>
+      </div>
+    </header>
+    <main id="canvas" aria-label="New tab workspace">
+      <section id="widget-clock" class="widget clock-widget">
+        <div class="clock" id="clock">00:00</div>
+        <div id="clock-caption" class="eyebrow">YOUR TIME. YOUR SPACE.</div>
+      </section>
+      <section id="widget-greeting" class="widget greeting-widget">
+        <p id="greeting">Welcome home, KiT<span>.</span></p>
+      </section>
+      <section id="widget-terminal" class="widget terminal-widget">
+        <form id="terminal-form" autocomplete="off">
+          <label for="terminal-input" id="prompt"
+            ><span class="prompt-user">KiT</span><span class="prompt-host">@Helium</span
+            ><span class="prompt-path"> ~ </span><span class="prompt-arrow">❯</span></label
+          ><input
+            id="terminal-input"
+            autofocus
+            spellcheck="false"
+            aria-label="Search or enter a command"
+            aria-autocomplete="list"
+            aria-controls="suggestions"
+            placeholder="Search anything, or run a command…"
+          /><kbd class="input-hint">↵</kbd>
+        </form>
+        <div id="suggestions" role="listbox" hidden></div>
+        <p id="terminal-status" role="status" aria-live="polite"></p>
+        <div class="terminal-foot">
+          <span id="browser-memory" aria-label="Browser RAM"
+            >Browser RAM · connect Windows bridge</span
+          ><span class="terminal-help"
+            ><kbd>tab</kbd> complete <span class="separator">/</span> <kbd>help</kbd> commands</span
+          >
+        </div>
+      </section>
+      <section id="widget-links" class="widget links-widget" aria-label="Quick links"></section>
+      <section id="widget-credits" class="widget credits-widget"></section>
+    </main>
+    <div id="edit-banner" hidden>
+      <span class="status-dot"></span> EDIT MODE <span>Drag · resize · snap to grid</span
+      ><button id="edit-done">Done <kbd>esc</kbd></button>
+    </div>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
+    <div id="modal-root"></div>
+    <script type="module" src="/src/newtab/index.ts"></script>
+  </body>
+</html>

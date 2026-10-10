@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NØVA · Live preview</title>
+    <link rel="stylesheet" href="/src/newtab/style.css" />
+  </head>
+  <body class="float-page">
+    <video id="preview" autoplay muted playsinline></video>
+    <div id="float-controls">
+      <span id="float-title">Live preview · view only</span
+      ><button id="start-float">📌 Pin above apps</button
+      ><button id="pin-float" hidden aria-pressed="true">📌 Pinned · Unpin</button
+      ><button id="mute-float">Unmute</button><button id="return-float">Return to tab</button
+      ><button id="close-float">Close</button>
+    </div>
+    <p id="float-status" role="status"></p>
+    <script type="module" src="/src/floating/view.ts"></script>
+  </body>
+</html>

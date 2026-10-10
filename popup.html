@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NØVA · Floating tabs</title>
+    <link rel="stylesheet" href="/src/newtab/style.css" />
+  </head>
+  <body class="popup-page">
+    <span class="wordmark">NØVA</span>
+    <h1>Float this tab</h1>
+    <p class="muted">Pin a preview above apps, or open an interactive window.</p>
+    <button id="live" class="primary">📌 Pinned preview</button
+    ><button id="interactive">▣ Interactive window</button>
+    <button id="direct-pin">📌 Pin video directly · no helper</button>
+    <p id="status" role="status"></p>
+    <script type="module" src="/src/floating/popup.ts"></script>
+  </body>
+</html>

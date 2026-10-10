@@ -1,0 +1,19 @@
+# NØVA 1.5.6 — QA
+
+Verified on Windows in isolated profiles, 2026-10-08.
+
+- Strict TypeScript, 18 unit tests and Store/Private/Firefox production builds passed. Legacy backups receive independent motion defaults without changing the general performance preference. Invalid typography and motion values are rejected.
+- Unmodified Store build in Helium and Chromium 141: live terminal letters had changing computed blur/transform during Rise + Blur, even with general page Animations off. Real music-player lyric nodes also contained the selected browser animation effects.
+- Targeted browser checks cover all six lyric styles, English grapheme animation, Arabic new-word left entry/previous-word right shift, stable word nodes, separate font families, persisted color/size, five distinct entrance styles, configured duration/stagger and animated tab titles. Disabled entrance and system reduced motion are respected.
+- Rapid selection test delays a real settings-write acknowledgement, changes style, then returns to the original choice before acknowledgement. The last selection remains saved and the preview stays correct.
+- Core Chromium checks passed for persistent layout/background/settings, search, scoped CSS, sessions, local audio and preservation of incompatible stored data. Feature checks cover local repeat, uploaded LRC seeking, Google Fonts cache, sidebar and PiP fixtures.
+- v14 media regression passed actual GIF/PNG/WAV/WebM full-backup restoration and corrupt-archive rejection; tab identity, native video PiP and avatar synchronization were exercised.
+- v15 connected an actual browser-launched Windows PowerShell host, disconnected it, and connected automatically after closing/reopening the same test browser. All six preview modes retain stable word DOM. Settings gallery and store screenshots are actual captures.
+- Firefox 157.0.1 / Zen 1.23.1b: temporary Gecko builds loaded New Tab, settings, music and About, connected actual Windows native hosts, played a WAV in a dedicated audio tab and removed that tab on Stop. Tests use unique temporary host registrations and clean them up.
+- Mozilla lint: zero errors/notices, seven guarded Chromium-API warnings. Gecko fallbacks were exercised.
+- Bootstrap / Setup dry-runs passed Windows PowerShell 5.1 and PowerShell 7, Unicode/spaced paths, all-browser discovery, correct build families, stable update folders, ZIP traversal rejection and isolated registration/uninstall. No permanent user bridge registration was changed.
+- Helium restored the supplied full backup through the production UI. Original H.264 wallpaper playback was confirmed through video dimensions and changing currentTime with muted looping. MP4/GIF recordings and the original verified wallpaper are included; the personal backup and music are excluded.
+
+Reports: v156-report.json (Helium), v156-chromium-report.json, browser-report.json, v14-report.json, v15-report.json, gecko-report.json, firefox-lint.json, spotify-auto-report.json, bootstrap-report.json, setup-report.json and demo-recording-report.json. SHA256SUMS.txt covers release file integrity.
+
+Limits: Spotify/LRCLIB synchronization uses controlled DOM/network fixtures, not a guarantee that every song has available lyrics. Exact word timing requires enhanced LRC; line timing uses estimates. English letters animate individually; Arabic words stay joined for correct shaping. Native tests validate actual Windows metadata/connection, not universal Spotify catalog coverage. Low Power pauses live motion; system preference handling is optional and enabled by default. Gecko packages are unsigned and require Mozilla signing for permanent installation. Chromium-family packages share a build; Edge/Brave/Vivaldi/Opera were not independently tested. No Store/GitHub upload or signing was performed. Previous releases remain unchanged.
