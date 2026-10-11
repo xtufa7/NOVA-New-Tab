@@ -1,5 +1,9 @@
 # Third-party notices
 
+## Catppuccin palette
+
+Mocha and Latte color values are from the [official Catppuccin palette](https://github.com/catppuccin/palette), licensed under MIT. Copyright (c) 2021 Catppuccin. NØVA is independently developed and is not affiliated with Catppuccin. The MIT permission, notice-retention and warranty disclaimer printed below also apply to these palette values.
+
 ## fflate 0.8.3 — bundled ZIP handling
 
 MIT License

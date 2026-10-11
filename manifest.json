@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "NØVA — New Tab",
   "short_name": "NØVA",
-  "version": "1.5.6",
-  "description": "An instant terminal-inspired new tab. Local music, workspaces, floating tabs, and deep customization.",
+  "version": "3.0.0",
+  "description": "Local-first New Tab, smart website themes, inspector, tab manager and command palette.",
   "author": "xtufa7 · https://github.com/xtufa7",
   "minimum_chrome_version": "116",
   "chrome_url_overrides": {
@@ -15,7 +15,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "NØVA · Float this tab",
+    "default_title": "NØVA · Browser suite",
     "default_popup": "popup.html"
   },
   "icons": {
@@ -28,13 +28,17 @@
     "offscreen",
     "activeTab",
     "declarativeNetRequest",
-    "scripting"
+    "scripting",
+    "alarms",
+    "sidePanel"
   ],
   "optional_permissions": [
     "tabs",
     "history",
     "tabCapture",
-    "nativeMessaging"
+    "nativeMessaging",
+    "sessions",
+    "tabGroups"
   ],
   "commands": {
     "open-control-center": {
@@ -60,6 +64,12 @@
         "default": "Ctrl+Shift+X"
       },
       "description": "Close preview / restore interactive tab"
+    },
+    "open-command-palette": {
+      "description": "Open NØVA command palette"
+    },
+    "open-tab-manager": {
+      "description": "Open NØVA Tab Manager"
     }
   },
   "content_security_policy": {
@@ -72,5 +82,8 @@
   "host_permissions": [
     "https://open.spotify.com/*",
     "https://lrclib.net/*"
-  ]
+  ],
+  "side_panel": {
+    "default_path": "manager.html"
+  }
 }

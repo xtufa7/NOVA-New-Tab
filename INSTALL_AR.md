@@ -1,4 +1,4 @@
-# تثبيت واستخدام NØVA 1.5.1
+# تثبيت واستخدام NØVA 3.0.0
 
 ![NØVA](docs/images/newtab.png)
 
@@ -43,3 +43,7 @@ Music → Lyrics animation preview: معاينة حية لخمس حركات، م
 Spotify Desktop على ويندوز اختياري: [دليل PowerShell](docs/WINDOWS_SPOTIFY_AR.md). أوامر التسجيل والإزالة في Music، والتحذير الأحمر يوضح أنه يعمل خارج الإضافة. نسخة المتصفح هي الافتراضية.
 
 Firefox / Zen: [دليل التثبيت والتوقيع](docs/BROWSERS_AR.md). ملف XPI الحالي غير موقّع؛ للتجربة استخدم Load Temporary Add-on، وللتثبيت الدائم وقّعه عبر Mozilla.
+
+## ميزات 3.0
+
+من Website Appearance فعّل ثيم المواقع وامنح النطاق المطلوب. Theme Inspector للتعديل المباشر، وTheme Marketplace للثيمات المحلية، وTab Manager لإدارة التابات. Alt+Shift+P يفتح لوحة الأوامر داخل NØVA؛ فعّل اختصارات المواقع من Command Palette إن أردتها هناك. [دليل الميزات](docs/THEME_ENGINE_3.md) · [الترحيل](docs/MIGRATION_3.md).

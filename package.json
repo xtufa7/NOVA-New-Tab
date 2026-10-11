@@ -1,8 +1,8 @@
 {
   "name": "nova-newtab",
-  "version": "1.5.6",
+  "version": "3.0.0",
   "private": true,
-  "description": "NÃ˜VA â€” instant, local-first Chromium / Helium new tab",
+  "description": "NØVA — local-first Browser Experience Suite",
   "author": "xtufa7 (https://github.com/xtufa7)",
   "license": "LicenseRef-Proprietary",
   "type": "module",
@@ -25,7 +25,12 @@
     "test:spotify": "tsx tests/spotify-auto.ts",
     "test:setup": "node tests/setup.mjs",
     "test:v155": "tsx tests/browser-v155.ts",
-    "test:v156": "tsx tests/browser-v156.ts"
+    "test:v156": "tsx tests/browser-v156.ts",
+    "test:v3": "tsx tests/browser-v3.ts",
+    "test:native-installer": "node tests/native-installer.mjs",
+    "verify:release": "node scripts/verify-release.mjs",
+    "verify:demos": "node scripts/verify-demos.mjs",
+    "test:preview": "node tests/browser-preview.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.1.0",

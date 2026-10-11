@@ -2,9 +2,9 @@
 
 ![NØVA — Mocha workspace](docs/images/newtab.png)
 
-A fast, customizable New Tab for **Chromium / Helium / Firefox / Zen**. Your clock, terminal, music and workspace in one place.
+A local-first browser experience suite for **Chromium / Helium / Firefox / Zen**. Customize your New Tab, recolor websites, inspect themes and manage tabs from one workspace.
 
-**Version 1.5.6** · Manifest V3 · TypeScript + Vite · Local media · Optional Windows PowerShell integration
+**Version 3.0.0** · Manifest V3 · TypeScript + Vite · Local media · Optional website access and Windows PowerShell integration
 
 <a href="https://github.com/xtufa7"><img src="public/accounts/github.png" width="42" height="42" alt="xtufa7 on GitHub"></a> <a href="https://guns.lol/xtufa7"><img src="public/accounts/guns.webp" width="42" height="42" alt="xtufa7 on Guns.lol"></a>
 
@@ -12,13 +12,39 @@ Created by [xtufa7](https://github.com/xtufa7) · [Guns.lol](https://guns.lol/xt
 
 ## Watch NØVA
 
-[![Video wallpaper and opening animation](docs/demos/video-background-demo.gif)](docs/demos/video-background-demo.mp4)
+[![Video wallpaper and opening animation](docs/demos/video-background.png)](docs/demos/video-background-demo.mp4)
 
 [Video wallpaper demo · MP4](docs/demos/video-background-demo.mp4) · [Opening animation · MP4](docs/demos/startup-demo.mp4) · [Original wallpaper · MP4](docs/demos/background-original.mp4)
 
 Recorded inside Helium using a full media backup restored through the extension's Backup screen. The original wallpaper video is included; the personal backup and music are excluded. [Video setup and demo details](docs/DEMOS.md).
 
 The header, clock and enabled widgets enter in sequence when a new tab opens. Editing settings does not restart the workspace animation. Opening motion has its own enable switch, independent of general page Animations. Low Power and the optional system reduced-motion preference are respected.
+
+## New in 3.0
+
+- **Website Appearance:** reversible Smart/Force/Dark-only/Original/Custom recoloring, multiple surfaces, contrast controls, gradients, domain priority, preservation rules and separate custom CSS. It starts disabled and uses only granted sites.
+- **Theme Inspector:** select and highlight, compare original/current colors and contrast, preview edits, undo/redo, save unique element rules, preserve originals and reset.
+- **Marketplace:** 14 local palettes, search/filter, New Tab or website application, custom token editor, safe JSON import/export. No remote code.
+- **Tab Manager:** real tab search/switch/pin/mute/close/reopen/reorder, optional native groups, workspaces, saved sessions, duplicate handling, sorting and discard. Full page, Chromium side panel and Firefox/Zen sidebar.
+- **Command Palette:** fuzzy search, categories, keyboard navigation, favorites and recent commands; themes, profiles, tabs, sessions, music, floating tools and settings. Website shortcuts are opt-in.
+- **Adaptive Appearance:** local schedules, system preference, profile rules, priorities and a one-hour manual override. **Focus:** safe element picking, per-site rules, reading width and reduced motion.
+- **Opening:** visible-paint sequencing, media readiness, five styles, independent header/clock/terminal/widgets/background targets, timing/easing and explicit replay.
+
+![Website appearance controls](docs/images/suite/website-settings.png)
+
+![Theme marketplace](docs/images/suite/marketplace.png)
+
+![Inspect a real page](docs/images/suite/inspector.png)
+
+![Tab manager](docs/images/suite/tab-manager.png)
+
+![Command palette](docs/images/suite/command-palette.png)
+
+![Adaptive themes](docs/images/suite/adaptive-settings.png)
+
+![Focus controls](docs/images/suite/focus-settings.png)
+
+[Theme and focus guide](docs/THEME_ENGINE_3.md) · [Architecture](docs/ARCHITECTURE_3.md) · [Update guide](docs/MIGRATION_3.md) · [Engineering report](docs/ENGINEERING_REPORT_3.md)
 
 ## Install
 
@@ -67,7 +93,7 @@ Open **Music → Lyrics typography & motion** to set Arabic/English font familie
 
 ![Opening animation settings](docs/images/gallery/opening-animation.png)
 
-Open **Performance → Opening animation**. Choose Rise + Blur, Rise, Fade, Zoom or Slide; customize duration, stagger, delay, distance, blur and easing. Choose header, widgets and wallpaper independently. Replay the inline preview or the real workspace. A status card explains whether motion is enabled or paused by Low Power/system preferences. General page Animations can remain off.
+Open **Performance → Opening animation**. Choose Rise + Blur, Rise, Fade, Zoom or Slide; customize duration, stagger, delay, distance, blur and easing. Choose header, clock, terminal, other widgets and wallpaper independently. Replay the inline preview or the real workspace. A status card explains whether motion is enabled or paused by Low Power/system preferences. General page Animations can remain off.
 
 Animated tab titles also follow their own controls in **Appearance → Browser tab · title & GIF icon**.
 
@@ -76,7 +102,7 @@ Animated tab titles also follow their own controls in **Appearance → Browser t
 
 ![PowerShell settings and warning](docs/images/desktop-bridge.png)
 
-**Runs outside the extension. Download only from [the official developer](https://github.com/xtufa7).** Extract the separate `NOVA-1.5.6-Windows-PowerShell.zip` to a permanent folder. Run **native/setup.cmd** once to discover NØVA IDs and register supported browsers together. Enable Desktop bridge in each browser where you want it. For manual commands, open **Music → Spotify desktop**, use all or choose any browser, and replace `C:\NOVA` with your extracted path. Run the registration command once, then enable Desktop bridge. The browser launches `native/spotify-bridge.ps1` when it starts. Disabling the bridge disconnects and stops that process; the uninstall command removes your per-user browser registration. No administrator access, scheduled task, Python, executable helper or local HTTP server is needed.
+**Runs outside the extension. Download only from [the official developer](https://github.com/xtufa7).** Extract the separate `NOVA-3.0.0-Windows-PowerShell.zip` to a permanent folder. Run **native/setup.cmd** once to discover NØVA IDs and register supported browsers together. Enable Desktop bridge in each browser where you want it. For manual commands, open **Music → Spotify desktop**, use all or choose any browser, and replace `C:\NOVA` with your extracted path. Run the registration command once, then enable Desktop bridge. The browser launches `native/spotify-bridge.ps1` when it starts. Disabling the bridge disconnects and stops that process; the uninstall command removes your per-user browser registration. No administrator access, scheduled task, Python, executable helper or local HTTP server is needed.
 
 The bundled `launch.cmd` starts Windows PowerShell 5.1. ExecutionPolicy Bypass applies only to that process; the installer does not change Windows policy. Windows media sessions supply Spotify title, artist, duration, position and play/pause state. Audio and screen content are not captured. Online lyrics is enabled by default and can be disabled in Music. Spotify Web remains the default source.
 
@@ -86,7 +112,7 @@ The bundled `launch.cmd` starts Windows PowerShell 5.1. ExecutionPolicy Bypass a
 
 | Browser family | Package | Installation / differences |
 | --- | --- | --- |
-| Chrome, Helium, Edge, Brave, Vivaldi, Opera | Browser-named Chromium ZIP | Extract → Load unpacked. Shared Chromium build. |
+| Chrome, Chromium, Helium, Edge, Brave, Vivaldi, Opera / GX | Browser-named Chromium ZIP | Extract → Load unpacked. Shared Chromium build. |
 | Firefox, Zen | Firefox/Zen ZIP or unsigned XPI | `about:debugging` → This Firefox → Load Temporary Add-on → manifest.json. Sign through Mozilla for permanent installation. |
 
 Firefox/Zen use a module background page instead of a Chromium service worker, and a dedicated **NØVA audio tab** instead of Offscreen. Keep the audio tab open. Live tabCapture preview is unavailable; interactive windows and the browser's built-in video PiP are the available paths. Memory reports unavailable when this browser does not expose page heap. GIF favicons fall back to a static image when ImageDecoder is unavailable. Firefox desktop minimum: 140.
@@ -115,7 +141,7 @@ The extension moves the actual video into the browser's [Document Picture-in-Pic
 | --- | --- |
 | Settings + video/image backgrounds + audio/covers + font files + tab icon + cached avatars | Settings and media references only |
 | SHA-256 checks for each media file; corruption rejected before changes | Strict settings validation |
-| Fresh media IDs on restore; original files retained until cleanup | Supports older configuration versions 1–5 |
+| Fresh media IDs on restore; original files retained until cleanup | Supports older configuration schemas 1–6 |
 | Up to 512 MB of local media per archive | Up to 10 MB of settings |
 
 Export can only include files still present on the device. The archive records missing references. Backups contain personal notes, history and configuration; keep your personal backup separate from this public source repository.
@@ -124,7 +150,7 @@ Export can only include files still present on the device. The archive records m
 
 About and the footer show GitHub and Guns.lol with locally bundled creator photos. Cached avatars from existing configurations remain supported and included in full backups. About has no upload/follow buttons.
 
-The default page makes no external requests. Optional features request their own access: Spotify for displayed playback metadata, LRCLIB for song lookup, Google Fonts for requested font downloads, and legacy Guns avatar sync if enabled in an existing configuration. No analytics or remote executable code. See [privacy policy](docs/PRIVACY_POLICY.md).
+Without a detected playing song, the default page makes no external requests. Optional features request their own access: Spotify for displayed playback metadata, LRCLIB for song lookup, Google Fonts for requested font downloads, and legacy Guns avatar sync if enabled in an existing configuration. No analytics or remote executable code. See [privacy policy](docs/PRIVACY_POLICY.md).
 
 The memory indicator reports this New Tab's JavaScript heap, not total browser RAM. Toggle it in Performance. No native process runs by default. The optional Desktop bridge starts PowerShell through Native Messaging only after one-time registration and explicit enabling. No localhost server is used.
 
@@ -147,7 +173,7 @@ session save work
 help
 ```
 
-Unknown text uses the selected search engine. ↑/↓ navigate history, Tab completes, Enter runs, Escape dismisses. Shortcuts apply in NØVA rather than intercepting typing in Discord or other website inputs.
+Unknown text uses the selected search engine. ↑/↓ navigate history, Tab completes, Enter runs, Escape dismisses. Website palette and Focus shortcuts require opt-in; ordinary typing in website inputs is left to the website.
 
 | Shortcut | Action |
 | --- | --- |
@@ -285,7 +311,7 @@ irm 'https://raw.githubusercontent.com/xtufa7/NOVA-New-Tab/main/native/bootstrap
 
 Requires Windows 10 1809 or newer. Use the Music settings command to include your extension ID. Files install into your local app-data folder; enable Desktop bridge in each browser. This URL becomes available after publishing the repository.
 
-To publish the extracted github-ready package, install Git + GitHub CLI and run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish-github.ps1`. It authenticates as xtufa7, creates the public NOVA-New-Tab repository if needed, and pushes main without force. [Setup and removal](docs/WINDOWS_SPOTIFY_AR.md).
+To upload the extracted github-ready package, install Git + GitHub CLI, sign in as xtufa7 and run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish-github.ps1`. It pushes the review branch only; main is unchanged. A release remains unpublished. [Review and setup guide](docs/SETUP_AR.md).
 
 After editing native scripts, run `npm run native:bootstrap` to refresh the embedded standalone installer. `npm run test:bootstrap` exercises temporary host registrations and cleans them up.
 
@@ -305,4 +331,4 @@ After approving a new Chromium installation, `Finish-Spotify-Setup.cmd` discover
 
 Rise + Blur is available in Music → Lyrics animation. It animates both the revealed words and the lyric line inside the terminal. Live lyrics use the browser animation engine independently of general page Animations. Low Power pauses live motion. The system reduced-motion checkbox is enabled by default.
 
-The publisher script installs Git/GitHub CLI through WinGet if missing, signs in as xtufa7, pushes main, and creates a versioned GitHub Release with browser/PowerShell assets when that release does not already exist. Live publishing requires your account login. [Setup guide](docs/SETUP_AR.md).
+The publisher script requires installed Git/GitHub CLI and an authenticated account. It pushes `dev/nova-3.0` only; `-CreateDraftRelease` is optional and creates a draft. No upload was performed here. The main Raw setup command continues to fetch main until you review and merge 3.0. [Setup guide](docs/SETUP_AR.md).

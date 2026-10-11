@@ -1,3 +1,4 @@
+import { buildSync } from 'esbuild';
 import { defineConfig } from 'vite';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -9,11 +10,15 @@ export default defineConfig(({ mode }) => {
   const gecko = mode === 'firefox';
   if (gecko) {
     manifest.background = { scripts: ['background.js'], type: 'module' };
-    manifest.permissions = manifest.permissions.filter((p: string) => p !== 'offscreen');
+    manifest.permissions = manifest.permissions.filter(
+      (p: string) => !['offscreen', 'sidePanel'].includes(p),
+    );
     manifest.optional_permissions = manifest.optional_permissions.filter(
-      (p: string) => p !== 'tabCapture',
+      (p: string) => !['tabCapture', 'tabGroups'].includes(p),
     );
     delete manifest.minimum_chrome_version;
+    delete manifest.side_panel;
+    manifest.sidebar_action = { default_title: 'NØVA Tabs', default_panel: 'manager.html' };
     manifest.browser_specific_settings = {
       gecko: {
         id: 'nova@xtufa7',
@@ -57,6 +62,7 @@ export default defineConfig(({ mode }) => {
   hashDirectory('src');
   hashDirectory('public');
   for (const path of [
+    'manager.html',
     'newtab.html',
     'settings.html',
     'offscreen.html',
@@ -70,6 +76,8 @@ export default defineConfig(({ mode }) => {
   const outDir = gecko ? 'dist-firefox' : mode === 'private' ? 'dist-private' : 'dist';
   return {
     base: './',
+    // Native CSS needs no external PostCSS config discovery in parent workspaces.
+    css: { postcss: { plugins: [] } },
     define: {
       __BUILD__: JSON.stringify({
         version: manifest.version,
@@ -86,6 +94,7 @@ export default defineConfig(({ mode }) => {
       target: 'chrome116',
       rollupOptions: {
         input: {
+          manager: resolve('manager.html'),
           newtab: resolve('newtab.html'),
           settings: resolve('settings.html'),
           popup: resolve('popup.html'),
@@ -102,8 +111,17 @@ export default defineConfig(({ mode }) => {
     plugins: [
       {
         name: 'nova-manifest',
+        apply: 'build',
         closeBundle() {
           mkdirSync(outDir, { recursive: true });
+          buildSync({
+            entryPoints: ['src/website/content.ts'],
+            outfile: resolve(outDir, 'website.js'),
+            bundle: true,
+            minify: true,
+            format: 'iife',
+            target: 'chrome116',
+          });
           writeFileSync(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
           writeFileSync(
             resolve(outDir, 'build-info.json'),

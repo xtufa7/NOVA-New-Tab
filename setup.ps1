@@ -2,7 +2,7 @@
 # Prepares browser packages; browser approval is required for local/unsigned extensions.
 param(
  [ValidatePattern('^[A-Za-z0-9_.-]+$')][string]$Repository = 'NOVA-New-Tab',
- [ValidatePattern('^[A-Za-z0-9_.-]+$')][string]$Branch = 'main',
+ [ValidatePattern('^[A-Za-z0-9_./-]+$')][string]$Branch = 'main',
  [ValidateSet('all','chrome','chromium','helium','edge','brave','vivaldi','opera','opera-gx','firefox','zen')][string[]]$Browsers = @('all'),
  [string]$InstallRoot = $(Join-Path $env:LOCALAPPDATA 'NOVA\BrowserSetup'),
  [string]$ArchivePath = '',
@@ -60,7 +60,8 @@ $zip = Join-Path $cache 'repository.zip'
 if ($ArchivePath) { Copy-Item -LiteralPath $ArchivePath -Destination $zip }
 else {
  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
- Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/xtufa7/$Repository/zipball/$Branch" -Headers @{'User-Agent'='NOVA-Official-Setup'} -OutFile $zip
+ $sourceRef = [Uri]::EscapeDataString($Branch)
+ Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/xtufa7/$Repository/zipball/$sourceRef" -Headers @{'User-Agent'='NOVA-Official-Setup'} -OutFile $zip
 }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $extracted = Join-Path $cache 'repository'
