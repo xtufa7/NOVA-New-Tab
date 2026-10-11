@@ -1,3 +1,4 @@
+import { suiteMessage, syncWebsite, scheduleAdaptive, openManager } from '../productivity/worker';
 // NØVA © xtufa7. Event-driven worker; no keepalive timers.
 import { KEY, validateSettings } from '../storage/settings';
 import { defaults } from '../settings/schema';
@@ -67,168 +68,171 @@ async function ensureAudio() {
 }
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (sender.id !== chrome.runtime.id || message?.target !== 'worker') return;
-  void (async () => {
-    if (String(message.type).startsWith('companion-')) return companionCommand(message, sender);
-    if (message.type === 'desktop-reconnect') {
-      if (!sender.url?.startsWith(chrome.runtime.getURL(''))) throw new Error('Use NØVA settings.');
-      await syncDesktop(await readSettings(), true);
-      return {};
-    }
-    if (message.type === 'guns-avatar') return syncGunsAvatar(message.url, sender);
-    if (message.type === 'spotify-reconnect') {
-      if (!sender.url?.startsWith(chrome.runtime.getURL(''))) throw new Error('Use NØVA settings.');
-      if (!(await chrome.permissions.contains({ origins: ['https://open.spotify.com/*'] })))
-        throw new Error('Allow Spotify access.');
-      const tabs = await chrome.tabs.query({ url: 'https://open.spotify.com/*' });
-      for (const tab of tabs)
-        if (tab.id)
-          await chrome.scripting
-            .executeScript({ target: { tabId: tab.id }, files: ['spotify.js'] })
-            .catch(() => {});
-      return { tabs: tabs.length };
-    }
-    if (message.type === 'spotify-state') {
-      const settings = await readSettings();
-      if (
-        !settings.integrations.spotify ||
-        !sender.tab?.id ||
-        !sender.url?.startsWith('https://open.spotify.com/')
-      )
-        throw new Error('Invalid Spotify sender.');
-      const data = message.state;
-      if (
-        !data ||
-        typeof data.title !== 'string' ||
-        typeof data.artist !== 'string' ||
-        data.title.length > 300 ||
-        data.artist.length > 300 ||
-        typeof data.playing !== 'boolean' ||
-        !Number.isFinite(data.current) ||
-        !Number.isFinite(data.duration) ||
-        data.current < 0 ||
-        data.duration < 0 ||
-        data.duration > 86400
-      )
-        throw new Error('Invalid playback metadata.');
-      const previous = await sessionValue<{ playing: boolean; updatedAt: number; tabId: number }>(
-        'nova.spotify',
-      );
-      if (
-        !data.playing &&
-        previous?.playing &&
-        previous.tabId !== sender.tab.id &&
-        Date.now() - previous.updatedAt < 8000
-      )
-        return {};
-      await chrome.storage.session.set({
-        'nova.spotify': { ...data, tabId: sender.tab.id, updatedAt: Date.now() },
-      });
-      return {};
-    }
-    if (message.type === 'audio-checkpoint') {
-      if (!sender.url?.startsWith(chrome.runtime.getURL('offscreen.html')))
-        throw new Error('Invalid audio sender.');
-      await chrome.storage.session.set({ 'nova.audioResume': message.snapshot });
-      return {};
-    }
-    if (message.type === 'music') {
-      const snapshot = await sessionValue<AudioSnapshot>('nova.audioResume');
-      const existing = await audioExists();
-      if (!existing && ['volume', 'mute', 'shuffle', 'repeat', 'seek'].includes(message.action)) {
-        const settings = await readSettings(),
-          profile = settings.profiles.find((p) => p.id === settings.activeProfile)!;
-        const action = message.action;
-        if (action === 'volume') {
-          if (!Number.isFinite(message.value) || message.value < 0 || message.value > 100)
-            throw new Error('Volume must be 0–100.');
-          profile.music.volume = message.value;
-        } else if (action === 'mute') profile.music.muted = !profile.music.muted;
-        else if (action === 'shuffle') profile.music.shuffle = !profile.music.shuffle;
-        else if (action === 'repeat')
-          profile.music.repeat = profile.music.repeat === 'one' ? 'all' : 'one';
-        if (action !== 'seek') await chrome.storage.local.set({ [KEY]: settings });
-        const status = snapshot?.profileId === profile.id ? snapshot.status : { ...idle };
-        Object.assign(status, {
-          volume: profile.music.volume,
-          muted: profile.music.muted,
-          shuffle: profile.music.shuffle,
-          repeat: profile.music.repeat,
-        });
-        if (snapshot?.profileId === profile.id) {
-          if (
-            action === 'seek' &&
-            Number.isFinite(message.value) &&
-            message.value >= 0 &&
-            message.value <= status.duration
-          ) {
-            snapshot.position = message.value;
-            status.current = message.value;
-          }
-          await chrome.storage.session.set({ 'nova.audioResume': snapshot });
-        }
-        return status;
-      }
-      if (!existing && ['status', 'pause', 'stop', 'sync'].includes(message.action)) {
-        if (snapshot && ['pause', 'stop'].includes(message.action)) {
-          snapshot.wantsPlay = false;
-          snapshot.status.ducked = false;
-          snapshot.status.playing = false;
-          await chrome.storage.session.set({ 'nova.audioResume': snapshot });
-        }
-        return message.action === 'stop' ? null : (snapshot?.status ?? null);
-      }
-      await ensureAudio();
-      const raw = (await chrome.storage.local.get(KEY))[KEY];
-      const settings = raw ? validateSettings(raw) : defaults();
-      const profile = settings.profiles.find((p) => p.id === settings.activeProfile)!;
-      const response = await chrome.runtime.sendMessage({
-        ...message,
-        target: 'audio',
-        profile,
-        performance: settings.performance,
-        externalAudio: await otherAudio(),
-        restore:
-          !existing &&
-          message.action === 'play' &&
-          snapshot?.trackId &&
-          snapshot.profileId === profile.id
-            ? snapshot
-            : undefined,
-      });
-      if (response?.error) throw new Error(response.error);
-      if (['volume', 'mute', 'shuffle', 'repeat'].includes(message.action)) {
-        const latest = validateSettings((await chrome.storage.local.get(KEY))[KEY] ?? defaults());
-        const active = latest.profiles.find((p) => p.id === response.profileId);
-        if (active) {
-          const key = message.action === 'mute' ? 'muted' : message.action;
-          Object.assign(active.music, { [key]: response.music[key] });
-          await chrome.storage.local.set({ [KEY]: latest });
-        }
-      }
-      if (message.action === 'stop' && (await audioExists())) {
-        if (isGecko) {
-          const tabs = await chrome.tabs.query({ url: chrome.runtime.getURL('offscreen.html') });
-          await Promise.all(tabs.map((t) => chrome.tabs.remove(t.id!)));
-        } else await chrome.offscreen.closeDocument();
-      }
-      return response?.status;
-    }
-    if (message.type === 'float-open')
-      return openFloating(message.tabId, message.mode, closeFloating);
-    if (message.type === 'float-close') {
-      await closeFloating();
-      return {};
-    }
-    if (message.type === 'float-restore') {
-      await restorePopup(message.tabId);
-      return {};
-    }
-    throw new Error('Unsupported browser action.');
-  })()
+  void handleMessage(message, sender)
     .then(respond)
     .catch((e) => respond({ error: e instanceof Error ? e.message : String(e) }));
   return true;
 });
+async function handleMessage(message: any, sender: chrome.runtime.MessageSender): Promise<any> {
+  if (String(message.type).startsWith('suite-'))
+    return suiteMessage(message, sender, (m) => handleMessage(m, sender));
+  if (String(message.type).startsWith('companion-')) return companionCommand(message, sender);
+  if (message.type === 'desktop-reconnect') {
+    if (!sender.url?.startsWith(chrome.runtime.getURL(''))) throw new Error('Use NØVA settings.');
+    await syncDesktop(await readSettings(), true);
+    return {};
+  }
+  if (message.type === 'guns-avatar') return syncGunsAvatar(message.url, sender);
+  if (message.type === 'spotify-reconnect') {
+    if (!sender.url?.startsWith(chrome.runtime.getURL(''))) throw new Error('Use NØVA settings.');
+    if (!(await chrome.permissions.contains({ origins: ['https://open.spotify.com/*'] })))
+      throw new Error('Allow Spotify access.');
+    const tabs = await chrome.tabs.query({ url: 'https://open.spotify.com/*' });
+    for (const tab of tabs)
+      if (tab.id)
+        await chrome.scripting
+          .executeScript({ target: { tabId: tab.id }, files: ['spotify.js'] })
+          .catch(() => {});
+    return { tabs: tabs.length };
+  }
+  if (message.type === 'spotify-state') {
+    const settings = await readSettings();
+    if (
+      !settings.integrations.spotify ||
+      !sender.tab?.id ||
+      !sender.url?.startsWith('https://open.spotify.com/')
+    )
+      throw new Error('Invalid Spotify sender.');
+    const data = message.state;
+    if (
+      !data ||
+      typeof data.title !== 'string' ||
+      typeof data.artist !== 'string' ||
+      data.title.length > 300 ||
+      data.artist.length > 300 ||
+      typeof data.playing !== 'boolean' ||
+      !Number.isFinite(data.current) ||
+      !Number.isFinite(data.duration) ||
+      data.current < 0 ||
+      data.duration < 0 ||
+      data.duration > 86400
+    )
+      throw new Error('Invalid playback metadata.');
+    const previous = await sessionValue<{ playing: boolean; updatedAt: number; tabId: number }>(
+      'nova.spotify',
+    );
+    if (
+      !data.playing &&
+      previous?.playing &&
+      previous.tabId !== sender.tab.id &&
+      Date.now() - previous.updatedAt < 8000
+    )
+      return {};
+    await chrome.storage.session.set({
+      'nova.spotify': { ...data, tabId: sender.tab.id, updatedAt: Date.now() },
+    });
+    return {};
+  }
+  if (message.type === 'audio-checkpoint') {
+    if (!sender.url?.startsWith(chrome.runtime.getURL('offscreen.html')))
+      throw new Error('Invalid audio sender.');
+    await chrome.storage.session.set({ 'nova.audioResume': message.snapshot });
+    return {};
+  }
+  if (message.type === 'music') {
+    const snapshot = await sessionValue<AudioSnapshot>('nova.audioResume');
+    const existing = await audioExists();
+    if (!existing && ['volume', 'mute', 'shuffle', 'repeat', 'seek'].includes(message.action)) {
+      const settings = await readSettings(),
+        profile = settings.profiles.find((p) => p.id === settings.activeProfile)!;
+      const action = message.action;
+      if (action === 'volume') {
+        if (!Number.isFinite(message.value) || message.value < 0 || message.value > 100)
+          throw new Error('Volume must be 0–100.');
+        profile.music.volume = message.value;
+      } else if (action === 'mute') profile.music.muted = !profile.music.muted;
+      else if (action === 'shuffle') profile.music.shuffle = !profile.music.shuffle;
+      else if (action === 'repeat')
+        profile.music.repeat = profile.music.repeat === 'one' ? 'all' : 'one';
+      if (action !== 'seek') await chrome.storage.local.set({ [KEY]: settings });
+      const status = snapshot?.profileId === profile.id ? snapshot.status : { ...idle };
+      Object.assign(status, {
+        volume: profile.music.volume,
+        muted: profile.music.muted,
+        shuffle: profile.music.shuffle,
+        repeat: profile.music.repeat,
+      });
+      if (snapshot?.profileId === profile.id) {
+        if (
+          action === 'seek' &&
+          Number.isFinite(message.value) &&
+          message.value >= 0 &&
+          message.value <= status.duration
+        ) {
+          snapshot.position = message.value;
+          status.current = message.value;
+        }
+        await chrome.storage.session.set({ 'nova.audioResume': snapshot });
+      }
+      return status;
+    }
+    if (!existing && ['status', 'pause', 'stop', 'sync'].includes(message.action)) {
+      if (snapshot && ['pause', 'stop'].includes(message.action)) {
+        snapshot.wantsPlay = false;
+        snapshot.status.ducked = false;
+        snapshot.status.playing = false;
+        await chrome.storage.session.set({ 'nova.audioResume': snapshot });
+      }
+      return message.action === 'stop' ? null : (snapshot?.status ?? null);
+    }
+    await ensureAudio();
+    const raw = (await chrome.storage.local.get(KEY))[KEY];
+    const settings = raw ? validateSettings(raw) : defaults();
+    const profile = settings.profiles.find((p) => p.id === settings.activeProfile)!;
+    const response = await chrome.runtime.sendMessage({
+      ...message,
+      target: 'audio',
+      profile,
+      performance: settings.performance,
+      externalAudio: await otherAudio(),
+      restore:
+        !existing &&
+        message.action === 'play' &&
+        snapshot?.trackId &&
+        snapshot.profileId === profile.id
+          ? snapshot
+          : undefined,
+    });
+    if (response?.error) throw new Error(response.error);
+    if (['volume', 'mute', 'shuffle', 'repeat'].includes(message.action)) {
+      const latest = validateSettings((await chrome.storage.local.get(KEY))[KEY] ?? defaults());
+      const active = latest.profiles.find((p) => p.id === response.profileId);
+      if (active) {
+        const key = message.action === 'mute' ? 'muted' : message.action;
+        Object.assign(active.music, { [key]: response.music[key] });
+        await chrome.storage.local.set({ [KEY]: latest });
+      }
+    }
+    if (message.action === 'stop' && (await audioExists())) {
+      if (isGecko) {
+        const tabs = await chrome.tabs.query({ url: chrome.runtime.getURL('offscreen.html') });
+        await Promise.all(tabs.map((t) => chrome.tabs.remove(t.id!)));
+      } else await chrome.offscreen.closeDocument();
+    }
+    return response?.status;
+  }
+  if (message.type === 'float-open')
+    return openFloating(message.tabId, message.mode, closeFloating);
+  if (message.type === 'float-close') {
+    await closeFloating();
+    return {};
+  }
+  if (message.type === 'float-restore') {
+    await restorePopup(message.tabId);
+    return {};
+  }
+  throw new Error('Unsupported browser action.');
+}
 async function closeFloating() {
   const entry = await sessionValue<FloatingRecord>('nova.float');
   if (entry?.viewerId) await chrome.tabs.remove(entry.viewerId).catch(() => {});
@@ -259,6 +263,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
     await syncDesktop(s);
     await syncPrivacy(s);
     await syncCompanion(s);
+    await syncWebsite();
+    scheduleAdaptive();
     if (!(await audioExists())) {
       refreshAudio();
       return;
@@ -299,6 +305,22 @@ async function restorePopup(tabId: number) {
   await chrome.storage.session.remove('nova.popup');
 }
 chrome.commands.onCommand.addListener((command) => {
+  if (command === 'open-tab-manager') {
+    void openManager();
+    return;
+  }
+  if (command === 'open-command-palette') {
+    void chrome.tabs.query({ active: true, currentWindow: true }).then(async ([t]) => {
+      if (!t?.id) return;
+      try {
+        await chrome.scripting.executeScript({ target: { tabId: t.id }, files: ['website.js'] });
+        await chrome.tabs.sendMessage(t.id, { type: 'nova-palette' }, { frameId: 0 });
+      } catch {
+        await chrome.tabs.create({ url: chrome.runtime.getURL('newtab.html') + '#palette' });
+      }
+    });
+    return;
+  }
   if (command === 'open-control-center')
     void chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
   else
@@ -361,6 +383,7 @@ chrome.tabs.onUpdated.addListener((_id, change) => {
   if (change.audible !== undefined || change.mutedInfo !== undefined) refreshAudio();
 });
 chrome.tabs.onRemoved.addListener((id) => {
+  void chrome.storage.session.remove('nova.snapshot.' + id).catch(() => {});
   refreshAudio();
   void (async () => {
     const popup = await sessionValue<PopupRecord>('nova.popup');
@@ -394,6 +417,8 @@ chrome.runtime.onInstalled.addListener(() => {
       await syncDesktop(s);
       await syncPrivacy(s);
       await syncCompanion(s);
+      await syncWebsite();
+      scheduleAdaptive();
     })
     .catch(() => {});
 });
@@ -403,6 +428,8 @@ chrome.runtime.onStartup.addListener(() => {
       await syncDesktop(s);
       await syncPrivacy(s);
       await syncCompanion(s);
+      await syncWebsite();
+      scheduleAdaptive();
     })
     .catch(() => {});
 });
@@ -412,6 +439,8 @@ chrome.permissions.onAdded.addListener(() => {
       await syncDesktop(s);
       await syncPrivacy(s);
       await syncCompanion(s);
+      await syncWebsite();
+      scheduleAdaptive();
     })
     .catch(() => {});
 });
@@ -420,6 +449,8 @@ chrome.permissions.onRemoved.addListener(() => {
     .then(async (s) => {
       await syncDesktop(s, true);
       await syncCompanion(s);
+      await syncWebsite();
+      scheduleAdaptive();
     })
     .catch(() => {});
 });

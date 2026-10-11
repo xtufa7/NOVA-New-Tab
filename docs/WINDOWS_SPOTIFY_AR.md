@@ -32,7 +32,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\native\bootstrap.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish-github.ps1
 ```
 
-يطلب تسجيل الدخول بحساب xtufa7، ينشئ مستودعًا عامًا باسم NOVA-New-Tab عند غيابه، ويرفع المصدر والصور والبناء إلى main، ثم يطبع رابط Raw. لا يرفع تلقائيًا الآن، ولا يستخدم force push. إذا كان المستودع موجودًا وفيه تاريخ مختلف يتوقف، بدل حذف تاريخك. اسم الإضافة المعروض يبقى NØVA؛ اسم GitHub يقبل ASCII فقط.
+يتطلب Git وGitHub CLI وحساب xtufa7 مسجّلًا مسبقًا. يرفع فرع المراجعة dev/nova-3.0 فقط، ولا يغيّر main أو ينشر إصدارًا. الأمر Raw على main يستمر بجلب نسخته الحالية حتى تراجع الفرع وتدمجه. [دليل المراجعة](SETUP_AR.md).
 
 
 

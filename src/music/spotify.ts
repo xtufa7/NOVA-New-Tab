@@ -12,7 +12,7 @@ export interface NowPlaying {
 }
 export async function spotifyStatus(): Promise<NowPlaying | undefined> {
   const integration = getSettings().integrations;
-  if (!integration.spotify) return;
+  if (!integration.spotify || !globalThis.chrome?.runtime?.id) return;
   const storageKey =
     integration.spotifySource === 'desktop' ? 'nova.spotify.desktop' : 'nova.spotify';
   const s = (await chrome.storage.session.get(storageKey))[storageKey] as NowPlaying | undefined;

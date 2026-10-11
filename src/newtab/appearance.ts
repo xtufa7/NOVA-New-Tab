@@ -1,3 +1,5 @@
+import { resolvePalette } from '../website/model';
+import { tokenPalette } from '../themes/tokens';
 import { getSettings, getProfile } from '../storage/settings';
 import { getMedia } from '../storage/media';
 import { el } from '../shared/dom';
@@ -7,7 +9,26 @@ let mediaURL = '';
 let lastMedia = '';
 let generation = 0;
 export async function renderAppearance() {
-  const a = getProfile().appearance,
+  const base = getProfile().appearance,
+    suite = getSettings().suite;
+  const id = suite.adaptive.enabled
+    ? resolvePalette(
+        suite,
+        getProfile().id,
+        new Date(),
+        matchMedia('(prefers-color-scheme: dark)').matches,
+      )
+    : base.theme;
+  const palette = tokenPalette(id, suite.website.custom);
+  const a = suite.adaptive.enabled
+      ? {
+          ...base,
+          color: palette.tokens.base,
+          accent: palette.tokens.accent,
+          text: palette.tokens.text,
+          gradient: palette.tokens.gradient,
+        }
+      : base,
     perf = getSettings().performance;
   const root = document.documentElement,
     body = document.body;
@@ -43,7 +64,8 @@ export async function renderAppearance() {
   for (const [key, value] of Object.entries(variables)) root.style.setProperty(key, value);
   const { applyFonts } = await import('../fonts/library');
   await applyFonts();
-  root.style.colorScheme = a.theme === 'frost' ? 'light' : 'dark';
+  root.style.colorScheme = a.theme === 'frost' || id === 'latte' ? 'light' : 'dark';
+  for (const [k, v] of Object.entries(palette.tokens)) root.style.setProperty('--nova-' + k, v);
   body.dataset.animations = perf.lowPower ? 'off' : perf.animations;
   body.dataset.cursor = a.cursor;
   let custom = document.querySelector<HTMLStyleElement>('#custom-css');
@@ -70,6 +92,7 @@ export async function renderAppearance() {
   if (desired !== lastMedia) {
     lastMedia = desired;
     const run = ++generation;
+    bg.dataset.mediaReady = 'pending';
     bg.replaceChildren();
     if (mediaURL) {
       URL.revokeObjectURL(mediaURL);
@@ -80,7 +103,7 @@ export async function renderAppearance() {
       (a.background === 'image' ||
         (a.background === 'video' && perf.video !== 'off' && !perf.lowPower))
     ) {
-      const blob = await getMedia(a.mediaId);
+      const blob = await getMedia(a.mediaId).catch(() => undefined);
       if (run !== generation) return;
       if (blob) {
         mediaURL = URL.createObjectURL(blob);
@@ -96,8 +119,38 @@ export async function renderAppearance() {
           media.style.objectFit = 'cover';
         }
         bg.append(media);
+        const done = () => {
+          if (run !== generation) return;
+          bg.dataset.mediaReady = 'ready';
+          document.dispatchEvent(new Event('nova-background-ready'));
+        };
+        const timer = setTimeout(done, 1800);
+        const ready = () => {
+          clearTimeout(timer);
+          done();
+        };
+        media.addEventListener('error', ready, { once: true });
+        if (media instanceof HTMLImageElement)
+          void media
+            .decode()
+            .catch(() => {})
+            .then(ready);
+        else {
+          media.addEventListener(
+            'loadeddata',
+            () => {
+              if ('requestVideoFrameCallback' in media) media.requestVideoFrameCallback(ready);
+              else ready();
+            },
+            { once: true },
+          );
+        }
       }
     }
+  }
+  if (!bg.querySelector('video,img')) {
+    bg.dataset.mediaReady = 'ready';
+    document.dispatchEvent(new Event('nova-background-ready'));
   }
   const video = bg.querySelector('video');
   if (video) {
@@ -131,4 +184,17 @@ document.addEventListener('visibilitychange', () => {
   const video = document.querySelector<HTMLVideoElement>('#background video');
   if (document.hidden) video?.pause();
   else if (video) void video.play().catch(() => {});
+});
+
+window.addEventListener('pagehide', () => {
+  document.querySelector<HTMLVideoElement>('#background video')?.pause();
+  if (mediaURL) {
+    URL.revokeObjectURL(mediaURL);
+    mediaURL = '';
+    lastMedia = '';
+    generation++;
+  }
+});
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) void renderAppearance();
 });

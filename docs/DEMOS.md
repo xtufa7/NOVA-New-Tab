@@ -1,6 +1,6 @@
 # Video wallpaper and opening animation
 
-[![NØVA running with a local video wallpaper](demos/video-background-demo.gif)](demos/video-background-demo.mp4)
+[![NØVA running with a local video wallpaper](demos/video-background.png)](demos/video-background-demo.mp4)
 
 - [Full video wallpaper demo](demos/video-background-demo.mp4) — actual Helium recording, 1280 × 720, silent.
 - [New Tab opening animation](demos/startup-demo.mp4) — staggered header and widget entrance.
@@ -26,8 +26,16 @@ Arabic text is not translated. Words enter from the left while previously reveal
 
 The recording restores a full backup through the production import screen in an isolated profile. The demo uses its wallpaper and visual appearance with a clean widget layout. The personal backup, terminal history and music track are not included in this repository. Export your own full backup to preserve media when moving browsers.
 
-The GIF renders directly in GitHub README; click it for the MP4. These demo files are documentation assets and are excluded from the browser extension build.
+The primary README preview is a static PNG linked to the MP4, so the page does not rely on an animated GIF for playback. An optional [secondary GIF](demos/video-background-demo.gif) remains available. These assets are excluded from the extension build. The new repository has not been uploaded, so GitHub's published rendering has not been inspected.
 
-## Motion customization in 1.5.6
+## Encoding and validation
+
+The source wallpaper is a 0.6-second, 3840×2160 H.264 loop at 30 fps. Its hard loop boundary and a lower-frame-rate GIF can affect perceived smoothness; this does not prove a GitHub rendering fault. The original file is preserved byte-for-byte.
+
+The new actual Helium screen recording is 1280×720 at the recorder's native 25 fps. MP4 conversion uses libx264, slow preset, CRF 18, yuv420p, original timestamps and faststart, without audio. The full demo is 10 seconds / 250 frames / 627,803 bytes; startup is 4 seconds / 100 frames / 301,860 bytes. The secondary 480 px, 10 fps GIF is 759,099 bytes, and the static PNG is 165,352 bytes.
+
+`scripts/verify-demos.mjs` checks codec, dimensions, pixel format, frame timestamps, duration, decoding, faststart placement and consecutive frame hashes. Both new MP4s decode cleanly with stable 40 ms frame steps and no consecutive identical downscaled frames. This is local media validation, not a claim about post-publication GitHub playback.
+
+## Motion customization in 3.0.0
 
 Music → Lyrics typography & motion controls separate Arabic/English fonts, color, size, weight, line height, English spacing, word/letter unit, duration, stagger, rise and blur. Performance → Opening animation controls five styles, timing, easing and targets. Both are independent of general page Animations. Status explains Low Power/system preference pauses; the system preference checkbox is on by default.

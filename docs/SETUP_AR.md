@@ -1,4 +1,4 @@
-# Setup من GitHub · 1.5.6
+# Setup من GitHub · 3.0.0
 
 ![إعدادات الكلمات](images/animation-preview.png)
 
@@ -10,7 +10,7 @@
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish-github.ps1
 ```
 
-يثبّت Git وGitHub CLI عبر WinGet إن كانا ناقصين، ثم يفتح تسجيل الدخول بحساب xtufa7. ينشئ المستودع العام NOVA-New-Tab إذا لم يكن موجودًا ويرفع الملفات والصور والبناء إلى main دون force push. ينشئ GitHub Release برقم الإصدار ويرفع ZIP/XPI المناسب لكل متصفح والجسر. إذا كان الإصدار موجودًا يحافظ على أصوله. قد يطلب مثبت Git صلاحيات ويندوز. إذا لم يتوفر WinGet ثبّت Git وGitHub CLI من موقعيهما الرسميين ثم أعد التشغيل.
+ثبّت Git وGitHub CLI وسجّل دخول حساب xtufa7 أولًا. المستودع يجب أن يكون موجودًا. السكربت يرفع فرع المراجعة `dev/nova-3.0` فقط، دون force push ودون تعديل main أو نشر إصدار. الخيار `-CreateDraftRelease` ينشئ مسودة إصدار فقط عند طلبه صراحة. راجع الفرع قبل دمجه بنفسك.
 
 لم يحدث رفع حي من هذه الجلسة؛ السكربت جاهز لتشغيله من حسابك.
 
@@ -20,7 +20,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish-github
 irm 'https://raw.githubusercontent.com/xtufa7/NOVA-New-Tab/main/setup.ps1' | iex
 ```
 
-الرابط لا يعمل قبل نشر الملفات. حمّل فقط من المطور الرسمي. السكربت يعمل خارج الإضافة.
+أمر main يجلب النسخة الموجودة على main، وهي قد تكون أقدم من 3.0 حتى تراجع الفرع وتدمجه. لم نرفع الملفات أو ننشر إصدارًا في هذه الجلسة. حمّل فقط من المطور الرسمي؛ السكربت يعمل خارج الإضافة. بعد رفع فرع المراجعة يمكنك تنزيل Setup منه وتجربته محليًا:
+
+```powershell
+Invoke-WebRequest 'https://raw.githubusercontent.com/xtufa7/NOVA-New-Tab/dev/nova-3.0/setup.ps1' -OutFile nova-setup.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\nova-setup.ps1 -Branch dev/nova-3.0 -PrepareOnly
+```
 
 يكتشف Chrome وChromium وHelium وEdge وBrave وVivaldi وOpera وOpera GX وFirefox وZen من المسارات القياسية وApp Paths وملفات التعريف الموجودة. نتيجة existing-profile قد تخص تثبيتًا سابقًا؛ النتيجة executable تعني العثور على ملف المتصفح. المتصفحات المحمولة تدعم تحديد BrowserPaths عند تشغيل ملف Setup محليًا.
 
