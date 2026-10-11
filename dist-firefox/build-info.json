@@ -1,7 +1,7 @@
 {
-  "version": "1.5.6",
-  "buildId": "9698927a70b9b6be",
-  "commit": "unversioned",
-  "timestamp": "2026-10-06T00:00:00.000Z",
+  "version": "3.0.0",
+  "buildId": "3e1f38557a309186",
+  "commit": "9177527",
+  "timestamp": "2026-10-11T16:32:32+03:00",
   "profile": "firefox"
 }

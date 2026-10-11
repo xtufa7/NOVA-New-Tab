@@ -1,0 +1,19 @@
+NØVA — Copyright (c) 2026 xtufa7
+https://github.com/xtufa7
+Discord: 0x.kitty / 0x.tufa7
+
+All rights reserved.
+
+Permission is granted for personal, non-commercial use of this software.
+Modification for personal use is permitted. Redistribution, resale,
+repackaging, publication of modified builds, and removal of author or
+copyright metadata require the copyright holder's prior written permission.
+Visual creator credits may be hidden using the supported setting.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+Third-party development dependencies and browser trademarks retain their
+respective owners' rights and licenses.
